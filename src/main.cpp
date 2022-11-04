@@ -1,76 +1,92 @@
 #include <Arduino.h>
-#include <Wire.h>
-#include <SoftwareSerial.h>
-#include "PCA9685.h"
-#include "SimpleKalmanFilter.h"
 #include "Pixetto.h"
+#include "CageBoard_Arm_Follow.h"
 
-#define sevo1_pin 0
-#define servo1_angle_min -90
-#define servo1_angle_max 90
-#define servo1_angle_init 0
+enum pixetto_color {
+  red = 1,
+  yellow = 2,
+  blue = 4,
+  purple = 5
+};
 
-#define sevo2_pin 1
-#define servo2_angle_min -90
-#define servo2_angle_max 90
-#define servo2_angle_init 0
+unsigned short rx = 11;
+unsigned short tx = 9;
 
-#define sevo3_pin 2
-#define servo3_angle_min -90
-#define servo3_angle_max 90
-#define servo3_angle_init 0
+unsigned short button_pin[4] = { A1,A2,A3,A4 }; // red, yellow, blue, purple
+//bool button_status[4];
+bool last_button_status[4];
+bool current_button_status[4];
+unsigned short color;
+unsigned long last_debounce_time = 0;
+unsigned long debounce_delay = 100;
 
-#define sevo4_pin 3
-#define servo4_angle_min -90
-#define servo4_angle_max 90
-#define servo4_angle_init 0
+unsigned long time = 0;
+bool flag = true;
 
-#define rxPin 11
-#define txPin 9
-
-Pixetto ss(rxPin, txPin);
-
-PCA9685 driver;
-// PCA9685 輸出 = 12 位 = 4096 步
-// 20ms 的 2.5% = 0.5ms ; 20ms 的 12.5% = 2.5ms
-// 4096 的 2.5% = 102 步；4096 的 12.5% = 512 步
-PCA9685_ServoEval pwmServo1; // (0deg, 90deg, 180deg)
-PCA9685_ServoEval pwmServo2; // (0deg, 90deg, 180deg)
-PCA9685_ServoEval pwmServo3; // (0deg, 90deg, 180deg)
-PCA9685_ServoEval pwmServo4; // (0deg, 90deg, 180deg)
-
-SimpleKalmanFilter KalmanFilter_X(1, 1, 0.01);
-SimpleKalmanFilter KalmanFilter_Y(1, 1, 0.01);
-
-int servo1Pos, servo2Pos, servo3Pos; // 當前角度
-int KalmanX, KalmanY;
+CageBoard_Arm_Follow CageBoard(rx, tx);
 
 void setup() {
-  Wire.begin(); // Wire must be started first
-
-  driver.resetDevices(); // Software resets all PCA9685 devices on Wire line
-  driver.init(); // Address pins A5-A0 set to B000000
-  driver.setPWMFreqServo(); // Set frequency to 50Hz
-
-  driver.setChannelPWM(0, pwmServo1.pwmForAngle(servo1_angle_init));
-  delay(10);
-  driver.setChannelPWM(1, pwmServo2.pwmForAngle(servo2_angle_init));
-  delay(10);
-  driver.setChannelPWM(2, pwmServo3.pwmForAngle(servo3_angle_init));
-  delay(10);
-  driver.setChannelPWM(3, pwmServo4.pwmForAngle(servo4_angle_init));
-  delay(10);
-
-  ss.begin();
-  ss.enableFunc(Pixetto::FUNC_COLOR_DETECTION);
-  delay(10);
   Serial.begin(9600);
-  
-  servo1Pos = servo1_angle_init+90;
-  servo2Pos = servo2_angle_init+90;
-  servo3Pos = servo3_angle_init+90;
+  for (int i = 0; i < 4; i++) {
+    pinMode(button_pin[i], INPUT_PULLUP);
+    last_button_status[i]=LOW;
+  }
+  CageBoard.init();
 }
 
+void loop() {
+  for (int i = 0;i < 4;i++) {
+    current_button_status[i] = digitalRead(button_pin[i]);
+  }
+
+  if (flag == false) {
+    Serial.println(flag);
+    if (CageBoard.search_ball(color)) {
+      flag = true;
+    }
+  }
+  else if (flag == true) {
+    Serial.println(flag);
+    if (current_button_status[0] == LOW || current_button_status[1] == LOW ||
+      current_button_status[2] == LOW || current_button_status[3] == LOW)
+    {
+      last_debounce_time = millis();
+    }
+
+    if ((millis() - last_debounce_time) > debounce_delay) {
+      for (int i = 0;i < 4;i++) {
+        last_button_status[i] = digitalRead(button_pin[i]);
+      }
+      for (int i = 0;i < 4;i++) {
+        if (current_button_status[i] != last_button_status[i]) {
+          switch (i)
+          {
+          case 0:
+            color = pixetto_color::red;
+            break;
+          case 1:
+            color = pixetto_color::yellow;
+            break;
+          case 2:
+            color = pixetto_color::blue;
+            break;
+          case 3:
+            color = pixetto_color::purple;
+            break;
+          default:
+            break;
+          }
+          flag = false;
+          CageBoard.reset();
+          break;
+        }
+
+      }
+    }
+  }
+}
+
+/*
 void loop() {
   if (ss.isDetected()) {
     Serial.print("x:");
@@ -86,41 +102,41 @@ void loop() {
       if (ss.getTypeID() == Pixetto::COLOR_RED) {
         if (KalmanX >= 50) {
           servo1Pos -= 5;
-          if (servo1Pos >= servo1_angle_max+90)
+          if (servo1Pos >= servo1_angle_max + 90)
             servo1Pos = 180;
-          driver.setChannelPWM(0, pwmServo1.pwmForAngle(servo1Pos-90));
+          driver.setChannelPWM(0, pwmServo1.pwmForAngle(servo1Pos - 90));
         }
         else if (KalmanX <= 25) {
           servo1Pos += 5;
-          if (servo1Pos <= servo1_angle_min+90)
+          if (servo1Pos <= servo1_angle_min + 90)
             servo1Pos = 0;
-          driver.setChannelPWM(0, pwmServo1.pwmForAngle(servo1Pos-90));
+          driver.setChannelPWM(0, pwmServo1.pwmForAngle(servo1Pos - 90));
         }
         else if (KalmanY <= 17) {
           servo2Pos += 5;
-          if (servo2Pos >= servo2_angle_max+70)
-            servo2Pos = 160;
-          driver.setChannelPWM(1, pwmServo2.pwmForAngle(servo2Pos-90));
+          if (servo2Pos >= servo2_angle_max + 30)
+            servo2Pos = 120;
+          driver.setChannelPWM(1, pwmServo2.pwmForAngle(servo2Pos - 90));
 
         }
         else if (KalmanY >= 60) {
           servo2Pos -= 5;
-          if (servo2Pos <= servo2_angle_min+90)
+          if (servo2Pos <= servo2_angle_min + 90)
             servo2Pos = 0;
-          driver.setChannelPWM(1, pwmServo2.pwmForAngle(servo2Pos-90));
+          driver.setChannelPWM(1, pwmServo2.pwmForAngle(servo2Pos - 90));
         }
 
         if (servo2Pos <= 65) {
           servo3Pos = servo2Pos + 25;
-          if (servo3Pos <= servo3_angle_min+90)
+          if (servo3Pos <= servo3_angle_min + 90)
             servo3Pos = 0;
-          driver.setChannelPWM(2, pwmServo3.pwmForAngle(servo3Pos-90));
+          driver.setChannelPWM(2, pwmServo3.pwmForAngle(servo3Pos - 90));
         }
         else if (servo2Pos >= 85) {
           servo3Pos = servo2Pos + 10;
-          if (servo3Pos >= servo3_angle_max+90)
+          if (servo3Pos >= servo3_angle_max + 90)
             servo3Pos = 180;
-          driver.setChannelPWM(2, pwmServo3.pwmForAngle(servo3Pos-90));
+          driver.setChannelPWM(2, pwmServo3.pwmForAngle(servo3Pos - 90));
         }
         else {
           servo3Pos = servo3_angle_init;
@@ -130,4 +146,4 @@ void loop() {
       }
     }
   }
-}
+}*/

@@ -120,32 +120,32 @@ public:
 
 	enum EVoiceCommand
 	{
-		VOICE_Hello = 1,	// §A¦n
-		VOICE_Thanks,       // ÁÂÁÂ
-		VOICE_Bye,			// ¦A¨£
-		VOICE_WhatsThis,	// ³o¬O¬Æ»ò
-		VOICE_WhatTime,		// ²{¦b´XÂI
-		VOICE_HowOld,		// §Ú´X·³
-		VOICE_WhatDay,		// ¤µ¤Ñ¬P´Á´X
-		VOICE_TellStory,	// Á¿¬G¨Æ
-		VOICE_TellJoke,		// »¡¯º¸Ü
-		VOICE_ReadPoem,		// ©À­ð¸Ö
-		VOICE_TurnOnLight,	// ¶}¿O
-		VOICE_TurnOffLight,	// Ãö¿O
-		VOICE_TurnLeft,		// ¥ªÂà
-		VOICE_TurnRight,	// ¥kÂà
-		VOICE_GoAhead,		// «e¶i
-		VOICE_MoveBack,		// «á°h
-		VOICE_Stop,			// °±¤î
-		VOICE_Open,			// ¶}±Ò
-		VOICE_Close,		// Ãö³¬
-		VOICE_OpenEyes1,	// ¸C¶}²´·ú
-		VOICE_OpenEyes2,	// ¸C²´
-		VOICE_CloseEyes1,	// ³¬¤W²´·ú
-		VOICE_CloseEyes2,	// ³¬²´
-		VOICE_Jump,			// ¸õ¤@¤U
-		VOICE_StandUp,		// °_¥ß
-		VOICE_SquatDown		// ÃÛ¤U		
+		VOICE_Hello = 1,	// ï¿½Aï¿½n
+		VOICE_Thanks,       // ï¿½ï¿½ï¿½ï¿½
+		VOICE_Bye,			// ï¿½Aï¿½ï¿½
+		VOICE_WhatsThis,	// ï¿½oï¿½Oï¿½Æ»ï¿½
+		VOICE_WhatTime,		// ï¿½{ï¿½bï¿½Xï¿½I
+		VOICE_HowOld,		// ï¿½Ú´Xï¿½ï¿½
+		VOICE_WhatDay,		// ï¿½ï¿½ï¿½Ñ¬Pï¿½ï¿½ï¿½X
+		VOICE_TellStory,	// ï¿½ï¿½ï¿½Gï¿½ï¿½
+		VOICE_TellJoke,		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		VOICE_ReadPoem,		// ï¿½ï¿½ï¿½ï¿½ï¿½
+		VOICE_TurnOnLight,	// ï¿½}ï¿½O
+		VOICE_TurnOffLight,	// ï¿½ï¿½ï¿½O
+		VOICE_TurnLeft,		// ï¿½ï¿½ï¿½ï¿½
+		VOICE_TurnRight,	// ï¿½kï¿½ï¿½
+		VOICE_GoAhead,		// ï¿½eï¿½i
+		VOICE_MoveBack,		// ï¿½ï¿½h
+		VOICE_Stop,			// ï¿½ï¿½ï¿½ï¿½
+		VOICE_Open,			// ï¿½}ï¿½ï¿½
+		VOICE_Close,		// ï¿½ï¿½ï¿½ï¿½
+		VOICE_OpenEyes1,	// ï¿½Cï¿½}ï¿½ï¿½ï¿½ï¿½
+		VOICE_OpenEyes2,	// ï¿½Cï¿½ï¿½
+		VOICE_CloseEyes1,	// ï¿½ï¿½ï¿½Wï¿½ï¿½ï¿½ï¿½
+		VOICE_CloseEyes2,	// ï¿½ï¿½ï¿½ï¿½
+		VOICE_Jump,			// ï¿½ï¿½ï¿½@ï¿½U
+		VOICE_StandUp,		// ï¿½_ï¿½ï¿½
+		VOICE_SquatDown		// ï¿½Û¤U		
 	};
 
 
